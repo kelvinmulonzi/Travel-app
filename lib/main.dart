@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wanderlust/screens/LandingScreen.dart';
 import 'package:wanderlust/screens/LoginScreen.dart';
+import 'package:wanderlust/screens/SignupScreen.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +38,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LandingPage(),
+      home: SignupPage(),
     );
   }
 }
