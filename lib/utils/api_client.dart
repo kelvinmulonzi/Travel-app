@@ -1,19 +1,19 @@
- // lib/utils/api_client.dart
+// lib/utils/api_client.dart
 
 import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://b66b-41-220-228-218.ngrok-free.app';
+  static const String baseUrl = 'https://fc40-41-220-228-218.ngrok-free.app';  // Replace with your actual API URL
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
 
   // Auth endpoints
-  static const String loginEndpoint = 'api/auth/login';
+  static const String loginEndpoint = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
 
   // Token management
@@ -90,57 +90,30 @@ class ApiClient {
     }
   }
 
-  Future<Response> register(RegisterRequest request) async {
-    print("request.toJson >>>>${json.encode(request.toJson())}");
-
-    // final response = await http.post(
-    //   // "http://localhost:8080/api/auth/register" as Uri,
-    //   Uri.https(baseUrl,registerEndpoint),
-    //   body: {
-    //     "username": "Strig",
-    //     "password": "Sting",
-    //     "email": "String"
-    //   },
-    // );
-    Dio dio = Dio();
-    final response = await dio.post(baseUrl,data:{
-      "username": "Strig",
-      "password": "Sting",
-      "email": "String"
-    } ,
-
-
-
+  Future<AuthResponse> register(RegisterRequest request) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl$registerEndpoint'),
+      headers: await _getHeaders(requiresAuth: false),
+      body: json.encode(request.toJson()),
     );
-    print(response);
-    return response;
-    // await _client.post(
-    //   Uri.parse('$baseUrl$registerEndpoint'),
-    //   headers: await _getHeaders(requiresAuth: false),
-    //   body: json.encode(request.toJson()),
-    // );
-    //
-    // http://localhost:8080/api/auth/register
-        // {"username":"kev","password":"12345678","email":"kev@gmail.com"}
 
-    //
-    // _handleError(response);
+    _handleError(response);
 
-    // final ApiResponse<AuthResponse> apiResponse = ApiResponse.fromJson(
-    //   json.decode(response.body),
-    //       (json) => AuthResponse.fromJson(json),
-    // );
+    final ApiResponse<AuthResponse> apiResponse = ApiResponse.fromJson(
+      json.decode(response.body),
+          (json) => AuthResponse.fromJson(json),
+    );
 
-    // if (apiResponse.data != null) {
-    //   await saveToken(apiResponse.data!.token);
-    //   return apiResponse.data!;
-    // } else {
-    //   throw ApiException(
-    //     statusCode: apiResponse.status,
-    //     message: apiResponse.message,
-    //     error: apiResponse.error,
-    //   );
-    // }
+    if (apiResponse.data != null) {
+      await saveToken(apiResponse.data!.token);
+      return apiResponse.data!;
+    } else {
+      throw ApiException(
+        statusCode: apiResponse.status,
+        message: apiResponse.message,
+        error: apiResponse.error,
+      );
+    }
   }
 }
 

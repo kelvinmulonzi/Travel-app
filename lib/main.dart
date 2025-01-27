@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wanderlust/screens/HomeScreen.dart';
 import 'package:wanderlust/screens/LandingScreen.dart';
 import 'package:wanderlust/screens/LoginScreen.dart';
 import 'package:wanderlust/screens/SignupScreen.dart';

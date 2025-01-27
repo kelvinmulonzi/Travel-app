@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../services/AuthService.dart';
 
 class SignupPage extends StatefulWidget {
@@ -30,7 +32,6 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   Future<void> _handleSignup() async {
-    print("handle signup");
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -46,7 +47,7 @@ class _SignupPageState extends State<SignupPage> {
         _passwordController.text,
         _emailController.text,
       );
-
+      print("handle signup $response");
       if (!mounted) return;
 
       // Show success message
@@ -58,7 +59,7 @@ class _SignupPageState extends State<SignupPage> {
       );
 
       // Navigate to login page
-      Navigator.of(context).pushReplacementNamed('/login');
+      Get.to('/login');
 
     } catch (e) {
       print("handle signup $e");

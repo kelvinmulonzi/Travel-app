@@ -1,7 +1,5 @@
 // lib/services/auth_service.dart
 
-import 'package:dio/dio.dart';
-
 import '../models/UserAuth.dart';
 import '../utils/api_client.dart';
 
@@ -18,7 +16,7 @@ class AuthService {
     return _apiClient.login(request);
   }
 
-  Future<Response> register(String username, String password, String email) async {
+  Future<AuthResponse> register(String username, String password, String email) async {
     final request = RegisterRequest(
       username: username,
       password: password,
