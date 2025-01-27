@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wanderlust/screens/LandingScreen.dart';
 import 'package:wanderlust/screens/LoginScreen.dart';
 
 void main() {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: LandingPage(),
     );
   }
 }
