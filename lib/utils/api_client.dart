@@ -1,13 +1,14 @@
 // lib/utils/api_client.dart
 
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://fc40-41-220-228-218.ngrok-free.app';  // Replace with your actual API URL
+  static const String baseUrl = 'http://192.168.254.71:8080';  // Replace with your actual API URL
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
@@ -15,6 +16,8 @@ class ApiClient {
   // Auth endpoints
   static const String loginEndpoint = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
+  static const String destinationurl = '/api/destinations/all';
+  static const String destinationById = '/api/destinations/';
 
   // Token management
   Future<void> saveToken(String token) async {
@@ -113,6 +116,38 @@ class ApiClient {
         message: apiResponse.message,
         error: apiResponse.error,
       );
+    }
+  }
+
+  ///
+  Dio dio= Dio();
+ Future<List<dynamic>> getProducts() async {
+    try{
+      final response = await dio.get("http://192.168.254.71:8080/api/destinations/all");
+      if(response.statusCode ==200){
+        print("this is data from getProducts ${response.data}");
+        return response.data["data"];
+      }else{
+        throw Exception("Failed to load products: ${response.statusCode} - ${response.statusMessage}");
+      }
+
+    }catch(e){
+      print("Error from getProducts $e");
+      rethrow;
+    }
+  }
+  Future<Map<String,dynamic>> getProductsById(String id) async {
+    try{
+      final response = await dio!.get("$baseUrl$destinationById",queryParameters:{
+        "id":id
+      });
+      if(response.statusCode ==200){
+        print(response.data);
+      }
+      return response.data["data"];
+    }catch(e){
+      print("Error from getProductsById $e");
+      rethrow;
     }
   }
 }

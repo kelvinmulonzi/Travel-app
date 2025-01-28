@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:wanderlust/screens/HomeScreen.dart';
 
 import '../services/AuthService.dart';
 
@@ -148,10 +150,13 @@ class _LoginPageState extends State<LoginScreen> {
 
                     SizedBox(height: 24),
 
+
                     // Login Button
                     ElevatedButton(
                       onPressed: () {
+                        Get.off(HomeScreen());
                         // Implement login logic
+
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Color(0xFF0989CD), backgroundColor: Colors.white,

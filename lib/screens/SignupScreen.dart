@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import '../services/AuthService.dart';
+import 'LoginScreen.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -55,11 +56,15 @@ class _SignupPageState extends State<SignupPage> {
         const SnackBar(
           content: Text('Registration successful! Please login.'),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
         ),
       );
 
-      // Navigate to login page
-      Get.to('/login');
+      // Add slight delay to show the success message
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Navigate to login page and remove the signup page from the stack
+      Get.off(() => LoginScreen(), transition: Transition.fadeIn);
 
     } catch (e) {
       print("handle signup $e");
@@ -200,7 +205,7 @@ class _SignupPageState extends State<SignupPage> {
 
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacementNamed('/login');
+                    Get.off(() => LoginScreen(), transition: Transition.fadeIn);
                   },
                   child: const Text('Already have an account? Login'),
                 ),
