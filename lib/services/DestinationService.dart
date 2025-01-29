@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/Destination.dart';
 
 class DestinationService {
-  final String baseUrl = 'https://259b-41-220-228-218.ngrok-free.app';
+  final String baseUrl = 'http://192.168.254.71:8080/destinations';
 
   Future<List<Destination>> getAllDestinations() async {
     final response = await http.get(Uri.parse('$baseUrl/all'));

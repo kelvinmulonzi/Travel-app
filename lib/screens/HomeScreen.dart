@@ -1,8 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/get_navigation.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:wanderlust/utils/api_client.dart';
+
+import 'DestinationScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -63,7 +67,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(DestinationsListScreen());
+                    },
                     child: const Text('View all'),
                   ),
                 ],
@@ -86,6 +92,8 @@ class HomeScreen extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: snapshot.data.length, // Will be replaced with actual data length
                     itemBuilder: (context, index) {
+
+
                       return Container(
                         width: 200,
                         margin: const EdgeInsets.only(right: 16),
@@ -114,20 +122,23 @@ class HomeScreen extends StatelessWidget {
                               ),
                               // You'll replace this with your image from database
                               child: CachedNetworkImage(
-                                imageUrl: "https://drive.google.com/uc?export=download&id=1-S3-IeGgl1ROn8whiojNZWBM6coAxfx8",
+                                imageUrl: snapshot.data[index]["imageUrl"]
+
+                                    ?? 'default_url_here',
                                 width: 150,
                                 errorWidget: (context, url, error) => CircleAvatar(
                                   radius: 70,
                                   backgroundImage: AssetImage('assets/images/oceans.png'),
                                 ),
-                                placeholder: (context, url) => SizedBox(
 
+                                placeholder: (context, url) => SizedBox(
                                   width: 50.0,
                                   child: Shimmer.fromColors(
                                     baseColor: Color(0xfff4f4f4),
                                     highlightColor: Colors.white,
                                     child: CircleAvatar(
                                       radius: 70,
+                                      backgroundColor: Colors.grey,
                                     ),
                                   ),
                                 ),
@@ -142,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Location name
-                                   Text(
+                                  Text(
                                     snapshot.data[index]["name"],
                                     style: TextStyle(
                                       fontSize: 16,
@@ -154,31 +165,31 @@ class HomeScreen extends StatelessWidget {
                                   // Location info row
                                   Row(
                                     children: [
-                                      const Icon(
-                                        Icons.location_on_outlined,
+                                      Icon(
+                                        Icons.location_on,
                                         size: 16,
                                         color: Colors.grey,
                                       ),
                                       const SizedBox(width: 4),
-                                       Text(
+                                      Text(
                                         snapshot.data[index]["location"],
                                         style: TextStyle(
-                                          color: Colors.grey,
                                           fontSize: 12,
+                                          color: Colors.grey,
                                         ),
                                       ),
                                       const Spacer(),
                                       Icon(
                                         Icons.star,
                                         size: 16,
-                                        color: Colors.amber.shade700,
+                                        color: Colors.amber,
                                       ),
                                       const SizedBox(width: 4),
-                                       Text(
-                                         snapshot.data[index]["rating"],
+                                      Text(
+                                        snapshot.data[index]["rating"].toString(),
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
                                           fontSize: 12,
+                                          color: Colors.grey,
                                         ),
                                       ),
                                     ],
@@ -195,36 +206,33 @@ class HomeScreen extends StatelessWidget {
               }
               return Container();
             }),
-
-
-            // Bottom navigation
-            NavigationBar(
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.calendar_today),
-                  label: 'Calendar',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.search),
-                  label: 'Search',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.message_outlined),
-                  label: 'Messages',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  label: 'Profile',
-                ),
-              ],
-              selectedIndex: 0,
-            ),
           ],
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.message_outlined),
+            label: 'Messages',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
+        selectedIndex: 0,
       ),
     );
   }

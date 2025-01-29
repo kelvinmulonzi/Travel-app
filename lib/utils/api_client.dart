@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../models/Booking.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
@@ -12,12 +12,15 @@ class ApiClient {
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
+  final Dio dio = Dio();
 
   // Auth endpoints
   static const String loginEndpoint = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
   static const String destinationurl = '/api/destinations/all';
   static const String destinationById = '/api/destinations/';
+  static const String bookingEndpoint = '/api/bookings';
+  static const String bookingById = '/api/bookings/';
 
   // Token management
   Future<void> saveToken(String token) async {
@@ -119,34 +122,78 @@ class ApiClient {
     }
   }
 
-  ///
-  Dio dio= Dio();
- Future<List<dynamic>> getProducts() async {
-    try{
-      final response = await dio.get("http://192.168.254.71:8080/api/destinations/all");
-      if(response.statusCode ==200){
+  // Product methods
+  Future<List<dynamic>> getProducts() async {
+    try {
+      final response = await dio.get("$baseUrl$destinationurl");
+      if (response.statusCode == 200) {
         print("this is data from getProducts ${response.data}");
         return response.data["data"];
-      }else{
+      } else {
         throw Exception("Failed to load products: ${response.statusCode} - ${response.statusMessage}");
       }
-
-    }catch(e){
+    } catch (e) {
       print("Error from getProducts $e");
       rethrow;
     }
   }
-  Future<Map<String,dynamic>> getProductsById(String id) async {
-    try{
-      final response = await dio!.get("$baseUrl$destinationById",queryParameters:{
-        "id":id
-      });
-      if(response.statusCode ==200){
+
+  Future<Map<String, dynamic>> getProductsById(String id) async {
+    try {
+      final response = await dio.get("$baseUrl$destinationById$id");
+      if (response.statusCode == 200) {
         print(response.data);
+        return response.data["data"];
+      } else {
+        throw Exception("Failed to load product by ID: ${response.statusCode} - ${response.statusMessage}");
       }
-      return response.data["data"];
-    }catch(e){
+    } catch (e) {
       print("Error from getProductsById $e");
+      rethrow;
+    }
+  }
+
+  // Booking methods
+  Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
+    try {
+      final response = await dio.post("$baseUrl$bookingEndpoint", data: bookingData);
+      if (response.statusCode == 200) {
+        print(response.data);
+        return response.data;
+      } else {
+        throw Exception("Failed to create booking: ${response.statusCode} - ${response.statusMessage}");
+      }
+    } catch (e) {
+      print("Error from createBooking $e");
+      rethrow;
+    }
+  }
+
+  Future<List> getUserBookings(String userId) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl$bookingById/user/$userId'),
+        headers: await _getHeaders(),
+      );
+
+      _handleError(response);
+
+      final ApiResponse<List<dynamic>> apiResponse = ApiResponse.fromJson(
+        json.decode(response.body),
+            (json) => (json as List).cast<Map<String, dynamic>>(),
+      );
+
+      if (apiResponse.data != null) {
+        return apiResponse.data!;
+      } else {
+        throw ApiException(
+          statusCode: apiResponse.status,
+          message: apiResponse.message,
+          error: apiResponse.error,
+        );
+      }
+    } catch (e) {
+      print("Error from getUserBookings: $e");
       rethrow;
     }
   }
