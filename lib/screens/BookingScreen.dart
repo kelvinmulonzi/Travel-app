@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../models/Booking.dart';
 import '../utils/api_client.dart';
 import '../models/Destination.dart';
+import 'PaymentScreen.dart';
 
 
 
@@ -73,7 +74,10 @@ class BookingScreen extends GetView {
               const SizedBox(height: 24),
               ElevatedButton(
                 // onPressed: _isLoading ? null : _createBooking,
-                onPressed: () {} ,
+                onPressed: () {
+                  print("snapshot.destination>ll>>>>>>>>${destination}");
+                  Get.to(()=>PaymentScreen(),arguments: destination);
+                } ,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   minimumSize: const Size(double.infinity, 50),

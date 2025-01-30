@@ -5,6 +5,7 @@ import 'package:wanderlust/screens/CreateDestinationScreen.dart';
 import 'package:wanderlust/screens/HomeScreen.dart';
 import 'package:wanderlust/screens/LandingScreen.dart';
 import 'package:wanderlust/screens/LoginScreen.dart';
+import 'package:wanderlust/screens/PaymentScreen.dart';
 import 'package:wanderlust/screens/SignupScreen.dart';
 import 'package:wanderlust/models/Destination.dart';  // Add this import
 
@@ -39,18 +40,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LandingPage(),
-        // destination: Destination(
-        //   id: 1,
-        //   name: '',
-        //   location: '',
-        //   description: 'Sample Description',
-        //   imageUrl: 'https://drive.google.com/uc?export=download&id=1eRFq0L5U9fDB7iCfJyyK8YM9Uld1Gino',
-        //   price: '',
-        //   rating: '',
-
-
-
+      home: HomeScreen(),
     );
   }
 }

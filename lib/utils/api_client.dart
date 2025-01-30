@@ -5,10 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Booking.dart';
+import '../models/Payment.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://192.168.254.71:8080';  // Replace with your actual API URL
+  static const String baseUrl = 'http://192.168.254.95:8080';  // Replace with your actual API URL
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
@@ -21,6 +22,7 @@ class ApiClient {
   static const String destinationById = '/api/destinations/';
   static const String bookingEndpoint = '/api/bookings';
   static const String bookingById = '/api/bookings/';
+  static const String paymentEndpoint = '/api/payments/initiate';
 
   // Token management
   Future<void> saveToken(String token) async {
@@ -121,6 +123,27 @@ class ApiClient {
       );
     }
   }
+
+  Future<Map<String, dynamic>> makePayment(Map<String, dynamic> paymentData) async {
+    try {
+      final response = await dio.post(
+        "$baseUrl$paymentEndpoint",
+        data: paymentData,
+        options: Options(headers: await _getHeaders()), // Include authorization headers if required
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Payment successful: ${response.data}");
+        return response.data;
+      } else {
+        throw Exception("Failed to process payment: ${response.statusCode} - ${response.statusMessage}");
+      }
+    } catch (e) {
+      print("Error from makePayment: $e");
+      rethrow;
+    }
+  }
+
 
   // Product methods
   Future<List<dynamic>> getProducts() async {
