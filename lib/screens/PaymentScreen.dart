@@ -5,7 +5,6 @@ import 'package:wanderlust/utils/api_client.dart';
 import '../models/Payment.dart';
 
 class PaymentScreen extends StatefulWidget {
-
   const PaymentScreen({super.key});
 
   @override
@@ -18,26 +17,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final _formKey = GlobalKey<FormState>();
   var destination = Get.arguments;
   late String amount;
+  String _phoneNumber = '';
 
   void _submitPayment() async {
     if (!_formKey.currentState!.validate()) return;
 
-    String phoneNumber = _phoneController.text.trim();
+    // Ensure the phone number starts with 254 and has correct format
+    String cleanNumber = _phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    if (!cleanNumber.startsWith('254')) {
+      cleanNumber = '254${cleanNumber.substring(cleanNumber.length - 9)}';
+    }
 
-
-
+    print("Submitting phone number: $cleanNumber"); // Debug print
 
     // Assuming bookingId is retrieved dynamically
     int bookingId = 123;
 
     Payment payment = Payment(
-      phoneNumber: phoneNumber,
+      phoneNumber: cleanNumber, // Using the cleaned and formatted number
       amount: double.parse(amount),
       bookingId: bookingId,
     );
 
     final data = await ApiClient().makePayment(payment.toJson());
     print("Processing Payment: $data");
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Payment Processing...')),
@@ -70,9 +75,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 initialCountryCode: 'KE',
+                disableLengthCheck: true,
                 onChanged: (phone) {
-                  print(phone.completeNumber);
+                  _phoneNumber = phone.completeNumber;
+                  print("Current phone number: $_phoneNumber"); // Debug print
+                },
+                validator: (phone) {
+                  if (phone == null) return 'Please enter a phone number';
 
+                  String cleanNumber = phone.completeNumber.replaceAll(RegExp(r'[^\d]'), '');
+
+                  if (cleanNumber.length != 12) {
+                    return 'Phone number must be 9 digits after 254';
+                  }
+                  if (!cleanNumber.startsWith('254')) {
+                    return 'Phone number must start with 254';
+                  }
                   return null;
                 },
               ),
@@ -81,11 +99,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
               TextFormField(
                 controller: _amountController,
-                decoration: InputDecoration(hintText:  amount.toString(),
-
+                decoration: InputDecoration(
+                  hintText: amount.toString(),
+                  labelText: 'Amount',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null || double.parse(value) <= 0) {
