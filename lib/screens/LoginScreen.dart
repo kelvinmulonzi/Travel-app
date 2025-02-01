@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:wanderlust/models/UserAuth.dart';
 import 'package:wanderlust/screens/HomeScreen.dart';
-
+import 'package:wanderlust/screens/SignupScreen.dart';
 import '../services/AuthService.dart';
 
-// Login Page
 class LoginScreen extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -15,6 +15,32 @@ class _LoginPageState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  void _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authService = AuthService();
+      await authService.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+      Get.off(HomeScreen());
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,9 +117,9 @@ class _LoginPageState extends State<LoginScreen> {
                     // Email Input
                     _buildTextField(
                       controller: _emailController,
-                      hint: 'Email Address',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
+                      hint: 'Username',
+                      icon: Icons.person_outline,
+                      keyboardType: TextInputType.text,
                     ),
 
                     SizedBox(height: 16),
@@ -110,9 +136,9 @@ class _LoginPageState extends State<LoginScreen> {
                         prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword 
-                              ? Icons.visibility_off 
-                              : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.white,
                           ),
                           onPressed: () {
@@ -150,14 +176,16 @@ class _LoginPageState extends State<LoginScreen> {
 
                     SizedBox(height: 24),
 
+                    // Error Message
+                    if (_errorMessage != null)
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(color: Colors.red),
+                      ),
 
                     // Login Button
                     ElevatedButton(
-                      onPressed: () {
-                        Get.off(HomeScreen());
-                        // Implement login logic
-
-                      },
+                      onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Color(0xFF0989CD), backgroundColor: Colors.white,
                         minimumSize: Size(double.infinity, 56),
@@ -165,7 +193,9 @@ class _LoginPageState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: _isLoading
+                          ? CircularProgressIndicator()
+                          : Text(
                         'Login',
                         style: TextStyle(
                           fontSize: 18,
@@ -180,7 +210,7 @@ class _LoginPageState extends State<LoginScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          // Navigate to Signup Page
+                          Get.to(() => SignupPage());
                         },
                         child: RichText(
                           text: TextSpan(
@@ -192,7 +222,6 @@ class _LoginPageState extends State<LoginScreen> {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-
                                 ),
                               ),
                             ],
@@ -235,5 +264,3 @@ class _LoginPageState extends State<LoginScreen> {
     );
   }
 }
-
-// Signup Page

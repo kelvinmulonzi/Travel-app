@@ -9,7 +9,7 @@ import '../models/Payment.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://192.168.254.95:8080';  // Replace with your actual API URL
+  static const String baseUrl = 'http://192.168.88.248:8080';
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
