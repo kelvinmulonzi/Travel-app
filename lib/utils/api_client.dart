@@ -50,7 +50,7 @@ class ApiClient {
     if (requiresAuth) {
       final token = await getToken();
       if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
+        headers['Bearer'] = token;
       }
     }
 
@@ -149,7 +149,11 @@ class ApiClient {
   // Product methods
   Future<List<dynamic>> getProducts() async {
     try {
-      final response = await dio.get("$baseUrl$destinationurl");
+      // Add the headers to the request
+      final response = await dio.get(
+        "$baseUrl$destinationurl",
+        options: Options(headers: await _getHeaders()), // Add this line
+      );
       if (response.statusCode == 200) {
         print("this is data from getProducts ${response.data}");
         return response.data["data"];
