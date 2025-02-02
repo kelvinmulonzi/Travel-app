@@ -89,7 +89,7 @@ class BookingScreen extends GetView {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
                     : const Text(
-                  'Confirm Booking',
+                  'Proceed To Booking',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
