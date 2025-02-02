@@ -16,11 +16,12 @@ class AuthService {
     return _apiClient.login(request);
   }
 
-  Future<AuthResponse> register(String username, String password, String email) async {
+  Future<AuthResponse> register(String username, String password, String email, String otp) async {
     final request = RegisterRequest(
       username: username,
       password: password,
       email: email,
+      otp: otp,
     );
     return _apiClient.register(request);
   }

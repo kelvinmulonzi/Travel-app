@@ -4,6 +4,7 @@ class BookingRequest {
   final String amount;
   final String location;
 
+
   BookingRequest({
     required this.destinationId,
     required this.amount,

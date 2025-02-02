@@ -23,7 +23,7 @@ class RegisterRequest {
   RegisterRequest({
     required this.username,
     required this.password,
-    required this.email,
+    required this.email, required String otp,
   });
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +37,7 @@ class AuthResponse {
   final String token;
   final String username;
   final String message;
+  
 
   AuthResponse({
     required this.token,

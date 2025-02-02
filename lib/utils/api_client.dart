@@ -24,6 +24,7 @@ class ApiClient {
   static const String bookingById = '/api/bookings/';
   static const String paymentEndpoint = '/api/payments/initiate';
 
+
   // Token management
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
