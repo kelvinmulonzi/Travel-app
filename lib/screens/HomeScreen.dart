@@ -140,35 +140,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(16),
                                     ),
-                                    child: Container(
-                                      height: 140,
+                                    child: CachedNetworkImage(
+                                      imageUrl: snapshot.data[index]["imageUrl"] ?? 'default_url_here',
+                                      fit: BoxFit.cover,
                                       width: 220, // Match parent width
-                                      color: Colors.grey[100], // Background color while loading
-                                      child: Center( // Center widget added
-                                        child: CachedNetworkImage(
-                                          imageUrl: snapshot.data[index]["imageUrl"] ?? 'default_url_here',
-                                          fit: BoxFit.contain,
-                                          width: 200, // Slightly smaller than container
-                                          height: 130, // Slightly smaller than container
-                                          errorWidget: (context, url, error) => Container(
-                                            width: 200,
-                                            height: 130,
-                                            decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                image: AssetImage('assets/images/oceans.png'),
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
+                                      height: 140, // Match parent height
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 220,
+                                        height: 140,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: AssetImage('assets/images/oceans.png'),
+                                            fit: BoxFit.cover,
                                           ),
-                                          placeholder: (context, url) => Shimmer.fromColors(
-                                            baseColor: Colors.grey[300]!,
-                                            highlightColor: Colors.grey[100]!,
-                                            child: Container(
-                                              width: 200,
-                                              height: 130,
-                                              color: Colors.white,
-                                            ),
-                                          ),
+                                        ),
+                                      ),
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          width: 220,
+                                          height: 140,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
@@ -215,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
 
                               // Content Container
-                              Expanded(  // Added Expanded
+                              Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: Column(
@@ -267,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(height: 8),
 
                                       // Description
-                                      Expanded(  // Added Expanded
+                                      Expanded(
                                         child: Text(
                                           snapshot.data[index]["description"] ?? "No description available",
                                           style: TextStyle(
@@ -275,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: Colors.grey[600],
                                             height: 1.3,
                                           ),
-                                          maxLines: 3,  // Increased to 3 lines since we have Expanded
+                                          maxLines: 3,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),

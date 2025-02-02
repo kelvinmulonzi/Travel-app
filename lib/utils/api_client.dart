@@ -23,6 +23,7 @@ class ApiClient {
   static const String bookingEndpoint = '/api/bookings';
   static const String bookingById = '/api/bookings/';
   static const String paymentEndpoint = '/api/payments/initiate';
+  static const String otpverification = '/api/auth/verifyotp';
 
 
   // Token management
@@ -121,6 +122,42 @@ class ApiClient {
         statusCode: apiResponse.status,
         message: apiResponse.message,
         error: apiResponse.error,
+      );
+    }
+  }
+  Future<bool> verifyOtp(String email, String otp) async {
+    try {
+      final response = await dio.post(
+        '$baseUrl$otpverification',
+        data: {
+          'email': email,
+          'otp': otp
+        },
+        options: Options(
+          headers: await _getHeaders(requiresAuth: false),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        // You might want to handle the token here if your backend sends it after verification
+        if (responseData['token'] != null) {
+          await saveToken(responseData['token']);
+        }
+        return true;
+      }
+      return false;
+    } on DioException catch (e) {
+      print('Error verifying OTP: ${e.response?.data}');
+      if (e.response?.statusCode == 400) {
+        throw ApiException(
+          statusCode: 400,
+          message: e.response?.data['message'] ?? 'Invalid OTP',
+        );
+      }
+      throw ApiException(
+        statusCode: e.response?.statusCode ?? 500,
+        message: 'Failed to verify OTP',
       );
     }
   }

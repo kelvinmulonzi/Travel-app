@@ -1,5 +1,3 @@
-// lib/services/auth_service.dart
-
 import '../models/UserAuth.dart';
 import '../utils/api_client.dart';
 
@@ -24,6 +22,15 @@ class AuthService {
       otp: otp,
     );
     return _apiClient.register(request);
+  }
+
+  // Add new method for OTP verification
+  Future<bool> verifyOtp(String email, String otp) async {
+    try {
+      return await _apiClient.verifyOtp(email, otp);
+    } catch (e) {
+      rethrow; // Propagate the error to be handled by the UI
+    }
   }
 
   Future<void> logout() async {

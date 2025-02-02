@@ -46,17 +46,17 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       if (!_otpSent) {
-        // Initial registration request
-        final response = await _authService.register(
+        // Step 1: Initial registration
+        await _authService.register(
           _usernameController.text,
           _passwordController.text,
           _emailController.text,
-          _otpController.text,
-
+          '', // Empty OTP for initial registration
         );
 
         setState(() {
           _otpSent = true;
+          _errorMessage = null;
         });
 
         if (!mounted) return;
@@ -68,25 +68,32 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
       } else {
-        // Verify OTP
-        final verificationResponse = await (
+        // Step 2: OTP Verification
+        final verified = await _authService.verifyOtp(
           _emailController.text,
           _otpController.text,
         );
 
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration successful!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
 
-        // Add slight delay to show the success message
-        await Future.delayed(const Duration(milliseconds: 500));
-        // Navigate to login page
-        Get.off(() => LoginScreen(), transition: Transition.fadeIn);
+        if (verified) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          // Add slight delay to show the success message
+          await Future.delayed(const Duration(milliseconds: 500));
+          // Navigate to login page
+          Get.off(() => LoginScreen(), transition: Transition.fadeIn);
+        } else {
+          setState(() {
+            _errorMessage = 'Invalid OTP. Please try again.';
+          });
+        }
       }
     } catch (e) {
       setState(() {
@@ -127,91 +134,97 @@ class _SignupPageState extends State<SignupPage> {
                 ),
 
               // Username Field
-              TextFormField(
-                controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+              if (!_otpSent) ...[
+                TextFormField(
+                  controller: _usernameController,
+                  enabled: !_otpSent,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a username';
+                    }
+                    if (value.length < 3) {
+                      return 'Username must be at least 3 characters';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a username';
-                  }
-                  if (value.length < 3) {
-                    return 'Username must be at least 3 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Email Field
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
+                // Email Field
+                TextFormField(
+                  controller: _emailController,
+                  enabled: !_otpSent,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an email';
+                    }
+                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an email';
-                  }
-                  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Password Field
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+                // Password Field
+                TextFormField(
+                  controller: _passwordController,
+                  enabled: !_otpSent,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
                 ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Confirm Password Field
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outline),
+                // Confirm Password Field
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  enabled: !_otpSent,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
                 ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm your password';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-              ),
+              ],
               const SizedBox(height: 24),
 
               // OTP Input Field
               if (_otpSent) ...[
-                Text(
+                const Text(
                   'Please enter the OTP sent to your email',
                   style: TextStyle(fontSize: 16),
                 ),

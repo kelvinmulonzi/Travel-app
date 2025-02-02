@@ -5,13 +5,32 @@ import '../utils/api_client.dart';
 import '../models/Destination.dart';
 import 'PaymentScreen.dart';
 
-class BookingScreen extends GetView {
+class BookingScreen extends StatefulWidget {
+  @override
+  _BookingScreenState createState() => _BookingScreenState();
+}
+
+class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _amountController;
   late TextEditingController _dateController;  // Controller for the date field
   bool _isLoading = false;
   final ApiClient _apiClient = ApiClient();
   var destination = Get.arguments;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController();
+    _dateController = TextEditingController();  // Initialize the date controller
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _dateController.dispose();  // Dispose the date controller
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,41 +48,52 @@ class BookingScreen extends GetView {
             children: [
               // Destination Details Card
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.network(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Image.network(
                         destination["imageUrl"],
-                        width: 60,
-                        height: 60,
+                        height: 200,
+                        width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.error),
+                        errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
                       ),
-                      Text(
-                        destination["name"],
-                        style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            destination["name"],
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Location: ${destination["location"]}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          if (destination["description"] != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              destination["description"]!,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+                          Text(
+                            'Price: ${destination["price"]}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Location: ${destination["location"]}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      if (destination["description"] != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          destination["description"]!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                      Text(
-                        'price: ${destination["price"]}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -134,45 +164,4 @@ class BookingScreen extends GetView {
     );
     return picked;
   }
-
-// Future<void> _createBooking() async {
-//   if (!_formKey.currentState!.validate()) return;
-//
-//   setState(() => _isLoading = true);
-//
-//   try {
-//     final bookingRequest = BookingRequest(
-//       destinationId: widget.destination.id!,
-//       amount: _amountController.text,
-//       location: widget.destination.location,
-//     );
-//
-//     await _apiClient.createBooking(bookingRequest.toJson());
-//
-//     if (!mounted) return;
-//
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text('Booking created successfully!')),
-//     );
-//
-//     Navigator.pop(context);
-//   } catch (e) {
-//     if (!mounted) return;
-//
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(content: Text('Error creating booking: $e')),
-//     );
-//   } finally {
-//     if (mounted) {
-//       setState(() => _isLoading = false);
-//     }
-//   }
-// }
-
-// @override
-// void dispose() {
-//   _amountController.dispose();
-//   super.dispose();
-// }
-
 }
