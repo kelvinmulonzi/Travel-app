@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:wanderlust/screens/BookingScreen.dart';
-import 'package:wanderlust/screens/CreateDestinationScreen.dart';
-import 'package:wanderlust/screens/HomeScreen.dart';
 import 'package:wanderlust/screens/LandingScreen.dart';
-import 'package:wanderlust/screens/LoginScreen.dart';
-import 'package:wanderlust/screens/PaymentScreen.dart';
-import 'package:wanderlust/screens/SignupScreen.dart';
-import 'package:wanderlust/models/Destination.dart';  // Add this import
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wanderlust/screens/HomeScreen.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -29,9 +25,30 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isLoggedIn = false;
+  @override
+  void initState() {
+    super.initState();
+    checkToken();
+  }
+  void checkToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+    if (token != null) {
+      setState(() {
+        isLoggedIn = true;
+      });
+    }
+
+  }
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -40,7 +57,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LandingPage(),
+      home: isLoggedIn?HomeScreen(): LandingPage(),
     );
   }
 }

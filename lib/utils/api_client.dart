@@ -9,7 +9,7 @@ import '../models/Payment.dart';
 import '../models/UserAuth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://192.168.88.248:8080';
+  static const String baseUrl = 'http://192.168.254.95:8080';
   static const String tokenKey = 'auth_token';
 
   final http.Client _client = http.Client();
@@ -20,7 +20,7 @@ class ApiClient {
   static const String registerEndpoint = '/api/auth/register';
   static const String destinationurl = '/api/destinations/all';
   static const String destinationById = '/api/destinations/';
-  static const String bookingEndpoint = '/api/bookings';
+  static const String bookingEndpoint = '/api/bookings/';
   static const String bookingById = '/api/bookings/';
   static const String paymentEndpoint = '/api/payments/initiate';
   static const String otpverification = '/api/auth/verifyotp';
@@ -140,11 +140,15 @@ class ApiClient {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        // You might want to handle the token here if your backend sends it after verification
-        if (responseData['token'] != null) {
-          await saveToken(responseData['token']);
+        if (responseData is Map<String, dynamic>) {
+          // Check for token if present
+          if (responseData['token'] != null) {
+            await saveToken(responseData['token']);
+          }
+          // Return true if success field is true or if status is 200
+          return responseData['success'] ?? true;
         }
-        return true;
+        return true; // Fallback for simple 200 response
       }
       return false;
     } on DioException catch (e) {
@@ -221,15 +225,28 @@ class ApiClient {
   // Booking methods
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
     try {
-      final response = await dio.post("$baseUrl$bookingEndpoint", data: bookingData);
+      // Make the POST request with headers and data
+      final response = await dio.post(
+        "$baseUrl$bookingEndpoint",
+        data: bookingData,
+        options: Options(headers: await _getHeaders()), // Include authorization headers if required
+      );
+
+      // Check if the response is successful
       if (response.statusCode == 200) {
-        print(response.data);
-        return response.data;
+        print("Booking created successfully: ${response.data}");
+        // Make sure response.data is the expected type, Map<String, dynamic>
+        if (response.data is Map<String, dynamic>) {
+          return response.data;
+        } else {
+          throw Exception("Unexpected response format: ${response.data}");
+        }
       } else {
         throw Exception("Failed to create booking: ${response.statusCode} - ${response.statusMessage}");
       }
     } catch (e) {
-      print("Error from createBooking $e");
+      print("Error from createBooking: $e");
+      // Optional: You could throw a more specific error here for clarity
       rethrow;
     }
   }

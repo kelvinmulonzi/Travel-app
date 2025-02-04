@@ -18,6 +18,8 @@ class _BookingScreenState extends State<BookingScreen> {
   final ApiClient _apiClient = ApiClient();
   var destination = Get.arguments;
 
+
+
   @override
   void initState() {
     super.initState();
@@ -27,11 +29,33 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   void dispose() {
-    _amountController.dispose();
+    //_amountController.dispose();
     _dateController.dispose();  // Dispose the date controller
     super.dispose();
   }
+ void createBooking() async {
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final booking = BookingRequest(
+        destinationId: destination["id"],
+        amount: destination["price"],
+        location: destination["location"],
+        date: _dateController.text,
+      );
+      print("Booking>>>>>>>>> ${booking.toJson()}");
+      await _apiClient.createBooking(booking.toJson());
+    } catch (e) {
+      print('Error creating booking: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     print("snapshot.BookingScreen>>>>>>>>> ${destination}");
@@ -117,6 +141,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     "${selectedDate.toLocal()}".split(' ')[0]; // Format: yyyy-mm-dd
                   }
                 },
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please select a date';
@@ -130,7 +155,8 @@ class _BookingScreenState extends State<BookingScreen> {
               ElevatedButton(
                 // onPressed: _isLoading ? null : _createBooking,
                 onPressed: () {
-                  print("snapshot.destination>ll>>>>>>>>${destination}");
+                  //print("snapshot.destination>ll>>>>>>>>${destination}");
+                  createBooking();
                   Get.to(() => PaymentScreen(), arguments: destination);
                 },
                 style: ElevatedButton.styleFrom(

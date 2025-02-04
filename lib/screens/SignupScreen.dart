@@ -23,6 +23,8 @@ class _SignupPageState extends State<SignupPage> {
   bool _isLoading = false;
   bool _otpSent = false;
   String? _errorMessage;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -46,12 +48,11 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       if (!_otpSent) {
-        // Step 1: Initial registration
         await _authService.register(
           _usernameController.text,
           _passwordController.text,
           _emailController.text,
-          '', // Empty OTP for initial registration
+          '',
         );
 
         setState(() {
@@ -68,7 +69,6 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
       } else {
-        // Step 2: OTP Verification
         final verified = await _authService.verifyOtp(
           _emailController.text,
           _otpController.text,
@@ -85,9 +85,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
           );
 
-          // Add slight delay to show the success message
           await Future.delayed(const Duration(milliseconds: 500));
-          // Navigate to login page
           Get.off(() => LoginScreen(), transition: Transition.fadeIn);
         } else {
           setState(() {
@@ -108,164 +106,319 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool enabled = true,
+    bool isPassword = false,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    VoidCallback? onToggleVisibility,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        obscureText: isPassword && obscureText,
+        keyboardType: keyboardType,
+        validator: validator,
+        style: TextStyle(color: const Color(0xFF0B7BCE)),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: const Color(0xFF0B7BCE).withOpacity(0.7)),
+          prefixIcon: Icon(icon, color: const Color(0xFF0B7BCE)),
+          suffixIcon: isPassword
+              ? IconButton(
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: const Color(0xFF0B7BCE),
+            ),
+            onPressed: onToggleVisibility,
+          )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF0B7BCE), width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.9),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              if (_errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.red.shade200),
-                  ),
-                  child: Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Colors.red.shade700),
-                  ),
-                ),
-
-              // Username Field
-              if (!_otpSent) ...[
-                TextFormField(
-                  controller: _usernameController,
-                  enabled: !_otpSent,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a username';
-                    }
-                    if (value.length < 3) {
-                      return 'Username must be at least 3 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Email Field
-                TextFormField(
-                  controller: _emailController,
-                  enabled: !_otpSent,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
-                    }
-                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  enabled: !_otpSent,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Confirm Password Field
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  enabled: !_otpSent,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-              const SizedBox(height: 24),
-
-              // OTP Input Field
-              if (_otpSent) ...[
-                const Text(
-                  'Please enter the OTP sent to your email',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _otpController,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter OTP',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter OTP';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleSignup,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(strokeWidth: 2)
-                    : Text(_otpSent ? 'Verify OTP' : 'Sign Up'),
-              ),
-              const SizedBox(height: 16),
-
-              // Already have an account
-              TextButton(
-                onPressed: () {
-                  Get.off(() => LoginScreen(), transition: Transition.fadeIn);
-                },
-                child: const Text('Already have an account? Login'),
-              ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0B7BCE),
+              Color(0xFF257DC3),
             ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 40),
+                    // App Logo
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.travel_explore,
+                        size: 60,
+                        color: Color(0xFF0B7BCE),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Title
+                    Text(
+                      _otpSent ? 'Verify OTP' : 'Create Account',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _otpSent
+                          ? 'Check your email for the verification code'
+                          : 'Sign up to start your journey',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Error Message
+                    if (_errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        margin: const EdgeInsets.only(bottom: 16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(color: Colors.red.shade700),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                    // Registration Fields
+                    if (!_otpSent) ...[
+                      _buildTextField(
+                        controller: _usernameController,
+                        label: 'Username',
+                        icon: Icons.person_outline,
+                        enabled: !_otpSent,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a username';
+                          }
+                          if (value.length < 3) {
+                            return 'Username must be at least 3 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _emailController,
+                        label: 'Email',
+                        icon: Icons.email_outlined,
+                        enabled: !_otpSent,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an email';
+                          }
+                          if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        icon: Icons.lock_outline,
+                        enabled: !_otpSent,
+                        isPassword: true,
+                        obscureText: _obscurePassword,
+                        onToggleVisibility: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm Password',
+                        icon: Icons.lock_outline,
+                        enabled: !_otpSent,
+                        isPassword: true,
+                        obscureText: _obscureConfirmPassword,
+                        onToggleVisibility: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+
+                    // OTP Field
+                    if (_otpSent) ...[
+                      const SizedBox(height: 20),
+                      _buildTextField(
+                        controller: _otpController,
+                        label: 'Enter OTP',
+                        icon: Icons.lock_clock_outlined,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter OTP';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+
+                    const SizedBox(height: 32),
+
+                    // Sign Up Button
+                    Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleSignup,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF0B7BCE),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF0B7BCE),
+                            ),
+                          ),
+                        )
+                            : Text(
+                          _otpSent ? 'Verify OTP' : 'Sign Up',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Login Link
+                    TextButton(
+                      onPressed: () {
+                        Get.off(() => LoginScreen(), transition: Transition.fadeIn);
+                      },
+                      child: Text(
+                        'Already have an account? Login',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

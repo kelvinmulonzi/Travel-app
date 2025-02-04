@@ -3,12 +3,14 @@ class BookingRequest {
   final int destinationId;
   final String amount;
   final String location;
+  final String date;
 
 
   BookingRequest({
     required this.destinationId,
     required this.amount,
     required this.location,
+    required this.date,
   });
 
   Map<String, dynamic> toJson() {
@@ -16,6 +18,7 @@ class BookingRequest {
       'destinationId': destinationId,
       'amount': amount,
       'location': location,
+      'date': date,
     };
   }
 }

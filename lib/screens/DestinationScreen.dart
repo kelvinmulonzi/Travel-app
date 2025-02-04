@@ -135,9 +135,15 @@ class _DestinationsListScreenState extends State<DestinationsListScreen> {
                                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                       ),
                                       SizedBox(height: 4),
-                                      Text(
-                                        destination["location"],
-                                        style: TextStyle(color: Colors.grey[600]),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.location_on, color: Colors.grey[600], size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            destination["location"],
+                                            style: Theme.of(context).textTheme.bodyLarge,
+                                          ),
+                                        ],
                                       ),
                                       Text(
                                         destination["description"],

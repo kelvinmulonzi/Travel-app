@@ -19,6 +19,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
   late String amount;
   String _phoneNumber = '';
 
+  @override
+  void initState() {
+    super.initState();
+    amount = destination["price"].toString();
+    _amountController.text = amount; // Set amount in controller
+  }
+
   void _submitPayment() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -51,8 +58,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("snapshot.destination>ll>>>>>>>>${destination}");
-    amount = destination["price"];
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
       body: Padding(
@@ -100,17 +105,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
               TextFormField(
                 controller: _amountController,
                 decoration: InputDecoration(
-                  hintText: amount.toString(),
-                  labelText: 'Amount',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixText: 'KES ', // Add currency prefix
+                  labelText: 'Payment Amount',
+                  fillColor: Colors.grey[100], // Light background color
+                  filled: true,
+                  enabled: false, // Disable editing
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || double.tryParse(value) == null || double.parse(value) <= 0) {
-                    return 'Enter a valid amount';
-                  }
-                  return null;
-                },
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+                readOnly: true, // Ensure the field is read-only
               ),
 
               const SizedBox(height: 20),

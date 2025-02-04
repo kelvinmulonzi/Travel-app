@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:wanderlust/utils/api_client.dart';
-import 'WishlistScreen.dart'; // Import WishlistScreen
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'LoginScreen.dart';
+import 'WishlistScreen.dart';
 import 'DestinationScreen.dart';
+import '../utils/api_client.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
+  String _userName = 'User'; // Default user name
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // Retrieve the username, default to 'User' if not found
+      _userName = prefs.getString('username') ?? 'User';
+    });
+  }
 
   void _onDestinationSelected(int index) {
     setState(() {
@@ -32,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         child: Column(
           children: [
@@ -43,14 +61,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Row(
                     children: [
+                      // Drawer opener button
+                      IconButton(
+                        icon: const Icon(Icons.menu),
+                        onPressed: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                      ),
                       SvgPicture.asset(
                         'assets/images/Group 30.svg',
                         height: 40,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        "Leonardo",
-                        style: TextStyle(
+                      Text(
+                        _userName, // Dynamic user name
+                        style: const TextStyle(
                           fontSize: 16,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -80,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Best Destination',
+                    'Top Destination',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -101,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
               future: ApiClient().getProducts(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -274,27 +299,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
 
                                       // View More Button
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: TextButton(
-                                          onPressed: () {
-                                            // Handle view more action
-                                          },
-                                          style: TextButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size(60, 24),
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          child: Text(
-                                            'View More',
-                                            style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // Align(
+                                      //   alignment: Alignment.centerRight,
+                                      //   child: TextButton(
+                                      //     onPressed: () {
+                                      //       // Handle view more action
+                                      //     },
+                                      //     style: TextButton.styleFrom(
+                                      //       padding: EdgeInsets.zero,
+                                      //       minimumSize: Size(60, 24),
+                                      //       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      //     ),
+                                      //     child: Text(
+                                      //       'View More',
+                                      //       style: TextStyle(
+                                      //         color: Colors.blue,
+                                      //         fontSize: 12,
+                                      //         fontWeight: FontWeight.w600,
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 ),
@@ -322,15 +347,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  CircleAvatar(
+                children: [
+                  const CircleAvatar(
                     radius: 30,
                     backgroundImage: AssetImage('assets/images/oceans.png'),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Leonardo',
-                    style: TextStyle(
+                    _userName,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -341,23 +366,31 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             // Add other drawer items here
             ListTile(
-              leading: Icon(Icons.email),
-              title: Text('your email'),
+              leading: const Icon(Icons.email),
+              title: const Text('Your Email'),
               onTap: () {
                 // Handle settings
               },
             ),
             ListTile(
-              leading: Icon(Icons.person_outline),
-              title: Text('Username'),
+              leading: const Icon(Icons.person_outline),
+              title: Text(_userName),
             ),
             const Spacer(),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Sign Out'),
-              onTap: () {
-                // Handle sign out
+              leading: const Icon(Icons.logout),
+              title: const Text('Sign Out'),
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove('auth_token');
+                prefs.remove('username');
+                Get.offAll(() => LoginScreen());
               },
+              tileColor: Colors.grey[200], // Optional: Add background color for better visibility
+              hoverColor: Colors.grey[300], // Optional: Add hover color for better visibility
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
             ),
           ],
         ),
@@ -372,10 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.bookmark_border),
             label: 'Bookmarks',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.message_outlined),
-            label: 'Messages',
-          ),
+
           NavigationDestination(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
