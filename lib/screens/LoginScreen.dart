@@ -158,21 +158,21 @@ class _LoginPageState extends State<LoginScreen> {
                     SizedBox(height: 16),
 
                     // Forgot Password
-                    // Align(
-                    //   alignment: Alignment.centerRight,
-                    //   child: TextButton(
-                    //     onPressed: () {
-                    //       // Implement forgot password
-                    //     },
-                    //     child: Text(
-                    //       'Forgot Password?',
-                    //       style: TextStyle(
-                    //         color: Colors.white70,
-                    //         decoration: TextDecoration.underline,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          // Implement forgot password
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
 
                     SizedBox(height: 24),
 
