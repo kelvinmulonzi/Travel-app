@@ -1,0 +1,16 @@
+image: cirrusci/flutter:stable
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        caches:
+          - flutter
+        script:
+          - flutter pub get
+          - flutter test
+          - flutter build apk --release
+        artifacts:
+          - build/app/outputs/flutter-apk/app-release.apk
+definitions:
+  caches:
+    flutter: ~/.pub-cache
