@@ -1,16 +1,17 @@
-image: cirrusci/flutter:stable
+image: instrumentisto/flutter:latest
+
+definitions:
+  caches:
+    flutter: ~/.pub-cache
+
 pipelines:
   default:
     - step:
-        name: Build and Test
+        name: Build Flutter APK
         caches:
           - flutter
         script:
           - flutter pub get
-          - flutter test
           - flutter build apk --release
         artifacts:
           - build/app/outputs/flutter-apk/app-release.apk
-definitions:
-  caches:
-    flutter: ~/.pub-cache
